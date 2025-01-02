@@ -45,24 +45,14 @@ fn list_tips_names(home: PathBuf, query: Option<String>) {
         }
     };
 
-    for entry in entries.flatten() {
+    entries.filter_map(Result::ok).filter_map(|entry| {
         let path = entry.path();
-        if let Some(ext) = path.extension() {
-            if ext != "tips" {
-                continue;
-            }
-            if let Some(file_stem) = path.file_stem() {
-                let file_stem_str = file_stem.to_string_lossy();
-                if let Some(ref q) = query {
-                    if file_stem_str.contains(q) {
-                        println!("{}", file_stem_str);
-                    }
-                } else {
-                    println!("{}", file_stem_str);
-                }
-            }
-        }
-    }
+        path.extension()
+            .and_then(|ext| if ext == "tips" { path.file_stem() } else { None })
+            .map(|stem| stem.to_string_lossy().into_owned())
+    }).filter(|file_stem| {
+        query.as_ref().map_or(true, |q| file_stem.contains(q))
+    }).for_each(|file_stem| println!("{}", file_stem));
 }
 
 fn list_tips_for(home: PathBuf, name: String, query: Option<String>) {
@@ -82,18 +72,16 @@ fn list_tips_for(home: PathBuf, name: String, query: Option<String>) {
     };
 
     let reader = BufReader::new(file);
-    for line_res in reader.lines() {
-        if let Ok(mut line) = line_res {
-            line = line.trim_end().to_string();
-            if let Some(ref q) = query {
-                if line.contains(q) {
-                    println!("{}", line);
-                }
-            } else {
+    reader.lines().filter_map(Result::ok).for_each(|line| {
+        let line = line.trim_end().to_string();
+        if let Some(ref q) = query {
+            if line.contains(q) {
                 println!("{}", line);
             }
+        } else {
+            println!("{}", line);
         }
-    }
+    });
 }
 
 fn list_tips(name: Option<String>, query: Option<String>) {
@@ -122,18 +110,11 @@ fn edit_tips(name: String, init: bool) {
     }
 
     let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_string());
-
-    let status = Command::new(editor)
-        .arg(&tips_file)
-        .status()
-        .expect("Failed to start editor process");
-
-    if !status.success() {
-        println!("Cancelled.");
-        return;
+    match Command::new(editor).arg(&tips_file).status() {
+        Ok(status) if status.success() => println!("Tips for {} updated.", name),
+        Ok(_) => println!("Cancelled."),
+        Err(e) => eprintln!("Failed to start editor process: {}", e),
     }
-
-    println!("Tips for {} updated.", name);
 }
 
 fn main() {
