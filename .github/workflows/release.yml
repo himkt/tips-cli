@@ -1,0 +1,36 @@
+name: Release
+on:
+  push:
+    tags:
+      - '*'
+env:
+  name: tips-cli
+jobs:
+  build:
+    name: Release binary
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - run: |
+          cargo build \
+            --release \
+            --target ${{ matrix.target }} \
+            --all-features \
+            --verbose
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/${{ matrix.target }}/release/tips-cli
+          asset_name: ${{ env.name}}-${{ matrix.target }}
+          tag: ${{ github.ref }}
+          overwrite: true
