@@ -29,7 +29,7 @@ jobs:
             --verbose
           tar czvf \
             ${{ env.name }}-${{ matrix.target }}.tar.gz \
-            -C target/${{ matrix.target }}/release tips-cli
+            -C target/${{ matrix.target }}/release ${{ env.name }}
       - uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
