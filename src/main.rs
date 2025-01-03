@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::process::Command;
 
 #[derive(Parser, Debug)]
-#[command(version = "0.1.0", about = "A Rust version of tips CLI")]
+#[command(version = "0.2.0", about = "A Rust version of tips CLI")]
 struct Args {
     #[command(subcommand)]
     command: Option<Commands>,
