@@ -27,10 +27,12 @@ jobs:
             --target ${{ matrix.target }} \
             --all-features \
             --verbose
+          tar czvf \
+            ${{ env.name }}-${{ matrix.target }}.tar.gz \
+            -C target/release tips-cli
       - uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.target }}/release/tips-cli
-          asset_name: ${{ env.name}}-${{ matrix.target }}
+          file: ${{ env.name }}-${{ matrix.target }}.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
