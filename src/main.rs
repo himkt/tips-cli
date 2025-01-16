@@ -45,14 +45,21 @@ fn list_tips_names(home: PathBuf, query: Option<String>) {
         }
     };
 
-    entries.filter_map(Result::ok).filter_map(|entry| {
-        let path = entry.path();
-        path.extension()
-            .and_then(|ext| if ext == "tips" { path.file_stem() } else { None })
-            .map(|stem| stem.to_string_lossy().into_owned())
-    }).filter(|file_stem| {
-        query.as_ref().map_or(true, |q| file_stem.contains(q))
-    }).for_each(|file_stem| println!("{}", file_stem));
+    let mut tips: Vec<String> = entries
+        .filter_map(Result::ok)
+        .filter_map(|entry| {
+            let path = entry.path();
+            path.extension()
+                .and_then(|ext| if ext == "tips" { path.file_stem() } else { None })
+                .map(|stem| stem.to_string_lossy().into_owned())
+        })
+        .filter(|file_stem| {
+            query.as_ref().map_or(true, |q| file_stem.contains(q))
+        })
+        .collect();
+
+    tips.sort();
+    tips.iter().for_each(|file_stem| println!("{}", file_stem));
 }
 
 fn list_tips_for(home: PathBuf, name: String, query: Option<String>) {
