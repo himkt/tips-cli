@@ -50,12 +50,16 @@ fn list_tips_names(home: PathBuf, query: Option<String>) {
         .filter_map(|entry| {
             let path = entry.path();
             path.extension()
-                .and_then(|ext| if ext == "tips" { path.file_stem() } else { None })
+                .and_then(|ext| {
+                    if ext == "tips" {
+                        path.file_stem()
+                    } else {
+                        None
+                    }
+                })
                 .map(|stem| stem.to_string_lossy().into_owned())
         })
-        .filter(|file_stem| {
-            query.as_ref().map_or(true, |q| file_stem.contains(q))
-        })
+        .filter(|file_stem| query.as_ref().map_or(true, |q| file_stem.contains(q)))
         .collect();
 
     tips.sort();
