@@ -18,3 +18,19 @@ commit_args = ""
 setup_hooks = []
 pre_commit_hooks = []
 post_commit_hooks = []
+
+[[tool.bumpversion.files]]
+filename = "Cargo.toml"
+search   = """
+[package]
+name = \"tips-cli\"
+version = \"{current_version}\""""
+replace  = """
+[package]
+name = \"tips-cli\"
+version = \"{new_version}\""""
+
+[[tool.bumpversion.files]]
+filename = "src/main.rs"
+search   = "#[command(version = \"{current_version}\", about"
+replace  = "#[command(version = \"{new_version}\", about"
